@@ -10,10 +10,26 @@ class CityController extends Controller
 
     public function index()
     {
-        $cities = City::all();
+        $cities = City::get();
         return view('city', compact('cities'));
     }
 
+    public function getData()
+    {
+        $cities = City::get();
+        if ($cities) {
+            return response()->json([
+                "code" => 200,
+                'messages' => 'Data Found',
+                'data' => $cities,
+            ]);
+        } else {
+            return response()->json([
+                "code" => 500,
+                'messages' => 'internal server error',
+            ]);
+        }
+    }
 
     public function store(Request $request)
     {

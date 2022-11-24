@@ -7,6 +7,7 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{asset('Assets/css/all.min.css')}}">
+    <link rel="stylesheet" href="{{asset('Assets/css/jquery.dataTables.min.css')}}">
     <link rel="stylesheet" href="{{asset('Assets/css/bootstrap.min.css')}}">
 </head>
 <body>
@@ -30,7 +31,9 @@
 
             </ul>
             <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="text" placeholder="Search">
+                <label>
+                    <input class="form-control mr-sm-2" type="text" placeholder="Search">
+                </label>
                 <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
             </form>
         </div>
@@ -64,14 +67,28 @@
 <hr>
 
 <section class="data_tables">
-
-
+    <div class="container">
+        <table class="table" id="cities">
+            <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Created_at</th>
+                <th scope="col">updated_at</th>
+                <th scope="col">actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
 </section>
 
 
 <script src="{{asset('Assets/js/popper.min.js')}}"></script>
-<script src="{{asset('Assets/js/jquery-3.6.1.min.js')}}"></script>
+<script src="{{asset('Assets/js/jquery-3.5.1.js')}}"></script>
 <script src="{{asset('Assets/js/bootstrap.js')}}"></script>
+
 <script src="{{asset('Assets/js/jquery.dataTables.min.js')}}"></script>
 <script>
     $(document).ready(function () {
@@ -84,16 +101,49 @@
                 dataType: "json",
                 data: $('#my_city_form').serialize(),
                 success: function (response) {
-                    $("#my_city_form").reset();
+                    $("#my_city_form").trigger('reset');
 
                 }
             });
         });
 
         /*--- Display Data---*/
-        
+
+        var table = $('#cities').DataTable({
+            ajax: "{{url('city/get-data')}}",
+            columns: [
+                {
+                    "data": "id",
+
+                },
+                {
+                    "data": "name"
+                },
+                {
+                    "data": "created_at"
+                },
+                {
+                    "data": "updated_at"
+                },
+                {
+                    data: null, render: function (data, row, type) {
+                        return `
+                            <td>
+                               <div class="d-flex">
+                                <button data-id="${row.id}" class="btn btn-sm btn-outline-success mr-2">edit</button>
+                                <button data-id="${row.id}" class="btn btn-sm btn-outline-danger">delete</button>
+                               </div>
+                            </td>
+`
+                    }
+                }
+
+            ]
+        });
+
 
     })
+    ; // end of document
 </script>
 </body>
 </html>
