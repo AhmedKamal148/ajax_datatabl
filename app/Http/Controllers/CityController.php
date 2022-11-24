@@ -48,27 +48,64 @@ class CityController extends Controller
 
     }
 
-
-    public function show($id)
+    public function edit(Request $request)
     {
-        //
+        $result = City::find($request->id);
+        if ($result) {
+            return response()->json([
+                'message' => 'Data Found',
+                'code' => 200,
+                'data' => $result,
+            ]);
+        } else {
+            return response()->json(
+                [
+                    'message' => "Internal Server Error",
+                    'code' => 500,
+                ]
+            );
+        }
     }
 
 
-    public function edit($id)
+    public function update(Request $request)
     {
-        //
+
+        $result = City::find($request->city_id);
+        $result->update([
+            'name' => $request->edit_Name,
+        ]);
+        if ($result) {
+            return response()->json([
+                'message' => 'Data Update',
+                'code' => 200,
+                'data' => $result,
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'internal server',
+                'code' => 500,
+
+            ]);
+        }
+
     }
 
 
-    public function update(Request $request, $id)
+    public function delete(Request $request)
     {
-        //
-    }
-
-
-    public function destroy($id)
-    {
-        //
+        $result = City::find($request->id);
+        $result->delete();
+        if ($result) {
+            return response()->json([
+                'message' => 'Delete City Successfully',
+                'code' => 200
+            ]);
+        } else {
+            return response()->json([
+                'message' => 'internal error',
+                'code' => 500
+            ]);
+        }
     }
 }

@@ -12,6 +12,7 @@
 </head>
 <body>
 
+{{--Begin Navbar--}}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
         <a class="navbar-brand" href="#">Ajax</a>
@@ -39,8 +40,10 @@
         </div>
     </div>
 </nav>
+{{--End Navbar--}}
 
 
+{{--Begin Form_section --}}
 <section class="ajax_form my-3">
     <div class="container">
         <form id="my_city_form"
@@ -49,10 +52,10 @@
             @csrf
             <div class="form-group">
                 <label for="name">Name</label>
-                <input name="name" type="text" class="form-control" id="name" aria-describedby="emailHelp"
+                <input name="name" type="text" class="form-control" id="name" aria-describedby="cityName"
                        placeholder="Enter Name">
                 @error('name')
-                <small id="emailHelp" class="form-text text-muted">{{$message}}</small>
+                <small id="cityName" class="form-text text-muted">{{$message}}</small>
                 @enderror
             </div>
 
@@ -64,7 +67,9 @@
         </form>
     </div>
 </section>
+{{--End  Form_section --}}
 <hr>
+{{--Begin  Data_Tables_section --}}
 
 <section class="data_tables">
     <div class="container">
@@ -84,15 +89,21 @@
     </div>
 </section>
 
+{{--End  Data_Tables_section --}}
+
+{{--Start  Models_section --}}
+@include('models._cityModels')
+{{--End  Models_section --}}
 
 <script src="{{asset('Assets/js/popper.min.js')}}"></script>
 <script src="{{asset('Assets/js/jquery-3.5.1.js')}}"></script>
 <script src="{{asset('Assets/js/bootstrap.js')}}"></script>
-
 <script src="{{asset('Assets/js/jquery.dataTables.min.js')}}"></script>
+
+{{--Ajax Logic--}}
 <script>
     $(document).ready(function () {
-        /*--- Insert Data---*/
+        /*--- Insert Data logic---*/
         $('#submit').click(function (e) {
             e.preventDefault();
             $.ajax({
@@ -102,15 +113,16 @@
                 data: $('#my_city_form').serialize(),
                 success: function (response) {
                     $("#my_city_form").trigger('reset');
+                    table.ajax().reload();
 
                 }
             });
         });
 
-        /*--- Display Data---*/
-
-        var table = $('#cities').DataTable({
+        /*--- Display Data logic---*/
+        let table = $('#cities').DataTable({
             ajax: "{{url('city/get-data')}}",
+
             columns: [
                 {
                     "data": "id",
@@ -126,24 +138,86 @@
                     "data": "updated_at"
                 },
                 {
-                    data: null, render: function (data, row, type) {
+                    data: null, render: function (data) {
                         return `
-                            <td>
-                               <div class="d-flex">
-                                <button data-id="${row.id}" class="btn btn-sm btn-outline-success mr-2">edit</button>
-                                <button data-id="${row.id}" class="btn btn-sm btn-outline-danger">delete</button>
-                               </div>
-                            </td>
-`
+                                <td>
+                                   <div class="d-flex">
+                                    <button id="edit"
+                                            data-id="${data.id}"
+                                            class="btn btn-sm btn-outline-success mr-2"
+                                            data-toggle="modal" data-target="#editModel" >
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button id="delete" data-id="${data.id}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                   </div>
+                                </td>
+                               `
                     }
                 }
 
             ]
         });
 
+        /*--- Edit form logic---*/
+        $(document).on('click', '#edit', function (e) {
+            $.ajax({
+                url: "{{url('city/edit')}}",
+                type: "post",
+                dataType: "json",
+                data: {
+                    '_token': "{{ csrf_token() }}",
+                    'id': $(this).data('id'),
 
-    })
-    ; // end of document
+                },
+                success: function (response) {
+                    $('input[name="id"]').val(response.data.id);
+                    $('input[name="edit_Name"]').val(response.data.name);
+                    $("input[name='city_id']").val(response.data.id);
+                }
+            })
+        });
+        /*--- Update form logic---*/
+        $(document).on('click', '#updateCity', function (e) {
+
+            if (confirm('Are You Sure To Update')) {
+                $.ajax({
+                    url: "{{url('city/update')}}",
+                    type: 'post',
+                    dataType: "json",
+                    data: $('#update_form').serialize(),
+                    success: function (response) {
+                        $('#update_form').trigger('reset');
+                        $('#editModel').modal('hide');
+                        table.ajax.reload();
+                    }
+                })
+            }
+        })
+        /*--- Delete form logic---*/
+        $(document).on('click', '#delete', function () {
+            if (confirm('Delete It ')) {
+                $.ajax(
+                    {
+                        url: "{{url('city/delete')}}",
+                        method: "post",
+                        dataType: "json",
+                        data: {
+                            "_token": "{{csrf_token()}}",
+                            "id": $(this).data('id'),
+                        },
+                        success: function (response) {
+                            table.ajax.reload();
+
+                        }
+
+                    }
+                )
+            }
+
+        });
+    }); // end of document
 </script>
 </body>
 </html>

@@ -17,12 +17,16 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'city', 'as' => 'cities'], function () {
     Route::get('/', [CityController::class, 'index']);
     Route::get('/get-data', [CityController::class, 'getData']);
+    Route::post('/edit', [CityController::class, 'edit']);
+    Route::post('/update', [CityController::class, 'update']);
     Route::post('/store', [CityController::class, 'store']);
+    Route::post('/delete', [CityController::class, 'delete']);
 });
 
 Route::group(['prefix' => 'client', 'as' => 'clients'], function () {
     Route::get('/', [ClientController::class, 'index']);
     Route::get('/get-data', [ClientController::class, 'getData']);
+    Route::post('/edit', [ClientController::class, 'edit']);
     Route::post('/store', [ClientController::class, 'store']);
 
 });
